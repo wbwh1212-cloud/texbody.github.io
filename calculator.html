@@ -1115,7 +1115,7 @@
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
                     if (!Array.isArray(importedData)) { alert('文件格式不正确'); return; }
