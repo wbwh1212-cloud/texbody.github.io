@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TEXBODY 工艺计算工具 — 纤维上浆工艺参数计算器，支持预测克重与反推速度，单一/多种溶质模式。">
     <title>工艺计算 - TEXBODY</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -397,6 +398,739 @@
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
+
+        /* 2026 responsive calculator redesign */
+        :root {
+            --calc-ink: #17272b;
+            --calc-soft: #50636a;
+            --calc-muted: #728287;
+            --calc-paper: #f3f6ef;
+            --calc-panel: #ffffff;
+            --calc-line: #d8e1d8;
+            --calc-teal: #167f7a;
+            --calc-teal-dark: #0f5d5b;
+            --calc-copper: #c87945;
+            --calc-green: #248a57;
+            --calc-charcoal: #1d2d31;
+            --calc-shadow: 0 18px 52px rgba(29, 45, 49, 0.12);
+        }
+
+        body {
+            color: var(--calc-ink);
+            background: var(--calc-paper);
+        }
+
+        nav {
+            height: 64px;
+            background: rgba(246, 248, 244, 0.92);
+            border-bottom: 1px solid rgba(216, 225, 216, 0.86);
+            box-shadow: 0 10px 34px rgba(29, 45, 49, 0.06);
+        }
+        .nav-content {
+            width: min(1180px, calc(100% - 40px));
+            max-width: none;
+            padding: 0;
+            gap: 18px;
+        }
+        .nav-logo {
+            color: var(--calc-ink);
+            font-size: 18px;
+            font-weight: 850;
+            letter-spacing: 0;
+        }
+        .nav-logo::before {
+            content: "T";
+            display: inline-grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+            border-radius: 8px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--calc-teal), var(--calc-copper));
+            font-size: 13px;
+            font-weight: 900;
+            vertical-align: middle;
+        }
+        .nav-links {
+            gap: 4px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-links::-webkit-scrollbar { display: none; }
+        .nav-links a {
+            display: inline-flex;
+            align-items: center;
+            height: 36px;
+            padding: 0 12px;
+            border-radius: 8px;
+            color: var(--calc-soft);
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .nav-links a:hover {
+            color: var(--calc-teal-dark);
+            background: rgba(22, 127, 122, 0.1);
+        }
+        .logout-btn {
+            min-width: 82px;
+            height: 36px;
+            padding: 0 12px;
+            border-radius: 8px;
+            background: var(--calc-charcoal);
+            color: #fff;
+            font-weight: 700;
+        }
+        .logout-btn:hover { background: var(--calc-teal-dark); }
+
+        .login-screen {
+            min-height: 100svh;
+            padding: 86px 20px 32px;
+            background:
+                linear-gradient(90deg, rgba(26, 42, 46, 0.92), rgba(26, 42, 46, 0.58)),
+                url("assets/fiber-hero.png") center / cover no-repeat;
+        }
+        .login-card {
+            max-width: 430px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.94);
+            color: var(--calc-ink);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow: 0 24px 72px rgba(0, 0, 0, 0.24);
+            text-align: left;
+            padding: 34px;
+        }
+        .login-icon {
+            width: 46px;
+            height: 46px;
+            margin: 0 0 20px;
+            border-radius: 8px;
+            background: var(--calc-charcoal);
+            color: #fff;
+            font-size: 22px;
+        }
+        .login-card h1 {
+            color: var(--calc-ink);
+            font-size: 30px;
+            margin-bottom: 6px;
+        }
+        .login-card .subtitle {
+            color: var(--calc-soft);
+            margin-bottom: 26px;
+        }
+        .form-group label {
+            color: var(--calc-ink);
+            font-size: 14px;
+        }
+        .form-group input {
+            height: 46px;
+            background: #f7faf6;
+            border: 1px solid var(--calc-line);
+            border-radius: 8px;
+            color: var(--calc-ink);
+        }
+        .form-group input:focus {
+            border-color: var(--calc-teal);
+            box-shadow: 0 0 0 3px rgba(22, 127, 122, 0.16);
+        }
+        .login-btn {
+            height: 46px;
+            border-radius: 8px;
+            background: var(--calc-teal);
+            font-size: 16px;
+        }
+        .login-btn:hover { background: var(--calc-teal-dark); }
+        .back-link { color: var(--calc-teal-dark); font-weight: 700; }
+
+        .calc-body {
+            min-height: 100svh;
+            display: block;
+            padding: 96px 22px 54px;
+            background:
+                linear-gradient(180deg, rgba(243, 246, 239, 0.94), rgba(243, 246, 239, 1) 360px),
+                url("assets/fiber-hero.png") top center / 100% auto no-repeat;
+        }
+        .app-container {
+            width: min(1280px, 100%);
+            max-width: none;
+            margin: 0 auto;
+            padding: 0;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            color: var(--calc-ink);
+        }
+
+        .calc-intro {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(260px, 0.72fr);
+            gap: 20px;
+            align-items: stretch;
+            margin-bottom: 20px;
+            padding: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: var(--calc-shadow);
+        }
+        .calc-kicker {
+            margin: 0 0 8px;
+            color: var(--calc-copper);
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0;
+        }
+        .app-title {
+            margin: 0;
+            text-align: left;
+            color: var(--calc-ink);
+            font-size: clamp(28px, 4vw, 42px);
+            line-height: 1.12;
+            letter-spacing: 0;
+        }
+        .calc-desc {
+            max-width: 720px;
+            margin: 12px 0 0;
+            color: var(--calc-soft);
+            font-size: 16px;
+        }
+        .formula-strip {
+            display: grid;
+            gap: 10px;
+            align-content: center;
+        }
+        .formula-strip span {
+            display: block;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: #edf4ee;
+            color: var(--calc-teal-dark);
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .layout-columns {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(380px, 0.95fr);
+            gap: 20px;
+            align-items: start;
+        }
+        .left-column,
+        .right-column {
+            min-width: 0;
+            display: grid;
+            gap: 12px;
+        }
+        .right-column {
+            align-self: start;
+        }
+
+        .tab-group {
+            position: sticky;
+            top: 76px;
+            z-index: 20;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px;
+            padding: 5px;
+            margin: 0;
+            border-radius: 8px;
+            background: rgba(29, 45, 49, 0.08);
+            border: 1px solid var(--calc-line);
+            backdrop-filter: blur(16px);
+        }
+        .tab {
+            min-height: 42px;
+            display: grid;
+            place-items: center;
+            padding: 0 12px;
+            border-radius: 6px;
+            color: var(--calc-soft);
+            font-size: 15px;
+            font-weight: 800;
+        }
+        .tab.active {
+            color: #fff;
+            background: var(--calc-charcoal);
+            box-shadow: 0 10px 24px rgba(29, 45, 49, 0.18);
+        }
+
+        .section-title {
+            margin: 8px 0 0;
+            padding: 0 2px;
+            color: var(--calc-ink);
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 15px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .section-title::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            background: var(--calc-copper);
+            flex: 0 0 auto;
+        }
+        .section-title > span:first-child,
+        .section-title::before + span {
+            margin-right: auto;
+        }
+
+        .card {
+            margin: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid var(--calc-line);
+            background: var(--calc-panel);
+            box-shadow: 0 10px 32px rgba(29, 45, 49, 0.07);
+        }
+        .derivator-card {
+            background: #fbfcf8;
+            border: 1px dashed rgba(22, 127, 122, 0.36);
+        }
+        .input-row {
+            min-height: 58px;
+            display: grid;
+            grid-template-columns: minmax(140px, 1fr) auto;
+            gap: 16px;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(216, 225, 216, 0.8);
+        }
+        .input-row:last-child { border-bottom: 0; }
+        .label,
+        .label-sm {
+            color: var(--calc-ink);
+            font-size: 15px;
+            font-weight: 750;
+        }
+        .label-sm { color: var(--calc-soft); }
+        .val-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .stepper {
+            width: 176px;
+            height: 38px;
+            border-radius: 8px;
+            border: 1px solid var(--calc-line);
+            background: #f5f8f3;
+        }
+        .stepper button {
+            width: 40px;
+            height: 38px;
+            background: transparent;
+            color: var(--calc-teal-dark);
+            font-size: 19px;
+        }
+        .stepper button:hover { background: rgba(22, 127, 122, 0.11); }
+        .stepper input {
+            width: 96px;
+            color: var(--calc-ink);
+            font-size: 15px;
+        }
+        select,
+        .basic-input {
+            width: 176px;
+            height: 38px;
+            border: 1px solid var(--calc-line);
+            border-radius: 8px;
+            background: #f5f8f3;
+            color: var(--calc-ink);
+            font-weight: 800;
+        }
+        select {
+            padding: 0 34px 0 12px;
+            text-align: left;
+            text-align-last: left;
+            background-image:
+                linear-gradient(45deg, transparent 50%, var(--calc-teal-dark) 50%),
+                linear-gradient(135deg, var(--calc-teal-dark) 50%, transparent 50%);
+            background-position:
+                calc(100% - 18px) 16px,
+                calc(100% - 12px) 16px;
+            background-size: 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+        }
+        select option { background: #fff; color: var(--calc-ink); }
+        .basic-input {
+            padding: 0 10px;
+            text-align: right;
+            color: var(--calc-teal-dark);
+        }
+        .stepper input:focus,
+        select:focus,
+        .basic-input:focus {
+            outline: none;
+            border-color: var(--calc-teal);
+            box-shadow: 0 0 0 3px rgba(22, 127, 122, 0.14);
+        }
+        .unit {
+            min-width: 48px;
+            color: var(--calc-copper);
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .density-results {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            padding: 14px;
+            background: rgba(223, 233, 223, 0.42);
+        }
+        .d-box {
+            padding: 16px;
+            border: 1px solid var(--calc-line);
+            border-radius: 8px;
+            background: #fff;
+            text-align: left;
+        }
+        .d-box-title {
+            color: var(--calc-muted);
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .d-box-val {
+            margin: 6px 0 10px;
+            color: var(--calc-ink);
+            font-size: 27px;
+            line-height: 1;
+        }
+        .apply-btn,
+        .export-btn,
+        .import-btn,
+        .clear-btn {
+            min-height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--calc-line);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--calc-teal-dark);
+            font-size: 12px;
+            font-weight: 850;
+            padding: 0 10px;
+        }
+        .apply-btn:hover,
+        .export-btn:hover,
+        .import-btn:hover {
+            background: rgba(22, 127, 122, 0.1);
+            color: var(--calc-teal-dark);
+        }
+        .clear-btn:hover {
+            background: rgba(200, 121, 69, 0.12);
+            color: #9d4d24;
+        }
+
+        .action-btn {
+            min-height: 48px;
+            margin: 0;
+            border-radius: 8px;
+            font-size: 15px;
+            letter-spacing: 0;
+            box-shadow: 0 14px 30px rgba(29, 45, 49, 0.16);
+        }
+        .btn-blue {
+            background: linear-gradient(135deg, var(--calc-teal), #2e9a91);
+        }
+        .btn-green {
+            background: linear-gradient(135deg, var(--calc-green), #62a766);
+        }
+        .action-btn:hover { filter: brightness(1.04); }
+
+        .result-box {
+            margin: 0;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--calc-line);
+            background: #fff;
+            text-align: left;
+            box-shadow: var(--calc-shadow);
+        }
+        .result-title {
+            color: var(--calc-muted);
+            font-size: 13px;
+            font-weight: 850;
+        }
+        .result-val {
+            margin-top: 8px;
+            font-size: clamp(28px, 4vw, 42px);
+            line-height: 1;
+        }
+        .color-blue { color: var(--calc-teal-dark); }
+        .color-green { color: var(--calc-green); }
+
+        .history-header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .search-input {
+            width: 180px;
+            height: 32px;
+            padding: 0 11px;
+            border-radius: 8px;
+            border: 1px solid var(--calc-line);
+            background: #fff;
+            color: var(--calc-ink);
+        }
+        .search-input:focus {
+            border-color: var(--calc-teal);
+            box-shadow: 0 0 0 3px rgba(22, 127, 122, 0.14);
+        }
+        .history-card {
+            max-height: 620px;
+            overflow: auto;
+            padding: 0;
+            margin: 0;
+            border: 0;
+            background: transparent;
+        }
+        .hist-item {
+            margin: 0 0 12px;
+            padding: 16px;
+            border: 1px solid var(--calc-line);
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 10px 28px rgba(29, 45, 49, 0.07);
+        }
+        .hist-item:hover { background: #fbfdf9; }
+        .hist-header {
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--calc-line);
+        }
+        .hist-time {
+            color: var(--calc-muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .hist-header-right {
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .badge-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .badge {
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+        .badge-mode {
+            background: rgba(22, 127, 122, 0.11);
+            color: var(--calc-teal-dark);
+        }
+        .badge-type-predict {
+            background: rgba(200, 121, 69, 0.13);
+            color: #985128;
+        }
+        .badge-type-speed {
+            background: rgba(36, 138, 87, 0.13);
+            color: var(--calc-green);
+        }
+        .hist-apply-btn {
+            height: 30px;
+            border-radius: 8px;
+            background: var(--calc-charcoal);
+            color: #fff;
+            padding: 0 10px;
+        }
+        .hist-apply-btn:hover {
+            background: var(--calc-teal-dark);
+            color: #fff;
+        }
+        .hist-delete-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: rgba(200, 121, 69, 0.1);
+            color: #9d4d24;
+            opacity: 1;
+            font-size: 18px;
+        }
+        .hist-delete-btn:hover {
+            background: rgba(200, 121, 69, 0.2);
+            transform: none;
+        }
+        .hist-body {
+            color: var(--calc-soft);
+            font-size: 13px;
+        }
+        .hist-row {
+            display: grid;
+            grid-template-columns: 92px 1fr;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .hist-row strong {
+            color: var(--calc-ink);
+            font-weight: 800;
+        }
+        .hist-footer {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--calc-line);
+        }
+        .hist-footer-title {
+            color: var(--calc-muted);
+            font-size: 13px;
+        }
+        .hist-footer-val {
+            font-size: 22px;
+            line-height: 1;
+        }
+        .empty-hint {
+            padding: 26px;
+            border: 1px dashed var(--calc-line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.74);
+            color: var(--calc-muted);
+        }
+        .history-card::-webkit-scrollbar { width: 8px; }
+        .history-card::-webkit-scrollbar-thumb {
+            background: rgba(29, 45, 49, 0.18);
+            border-radius: 8px;
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 1080px) {
+            .layout-columns {
+                grid-template-columns: 1fr;
+            }
+            .tab-group {
+                position: static;
+            }
+            .right-column {
+                position: static;
+            }
+            .history-card {
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 760px) {
+            nav { height: 58px; }
+            .nav-content {
+                width: calc(100% - 18px);
+                gap: 10px;
+            }
+            .nav-logo {
+                font-size: 0;
+                flex: 0 0 auto;
+            }
+            .nav-logo::before {
+                margin-right: 0;
+            }
+            .nav-links {
+                max-width: calc(100vw - 118px);
+            }
+            .nav-links a {
+                height: 34px;
+                padding: 0 10px;
+                font-size: 13px;
+            }
+            .logout-btn {
+                min-width: 66px;
+                height: 34px;
+                font-size: 12px;
+            }
+            .calc-body {
+                padding: 78px 14px 36px;
+                background:
+                    linear-gradient(180deg, rgba(243, 246, 239, 0.96), rgba(243, 246, 239, 1) 300px),
+                    url("assets/fiber-hero.png") top center / cover no-repeat;
+            }
+            .calc-intro {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            .formula-strip {
+                grid-template-columns: 1fr;
+            }
+            .tab {
+                min-height: 40px;
+                font-size: 14px;
+            }
+            .input-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 14px;
+            }
+            .val-wrap {
+                width: 100%;
+                justify-content: stretch;
+            }
+            .stepper,
+            select,
+            .basic-input {
+                width: 100%;
+                flex: 1 1 auto;
+            }
+            .stepper input {
+                width: 100%;
+                flex: 1 1 auto;
+            }
+            .unit {
+                min-width: 46px;
+                text-align: right;
+            }
+            .density-results {
+                grid-template-columns: 1fr;
+            }
+            .section-title {
+                align-items: flex-start;
+            }
+            .history-header-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+            .search-input {
+                width: 100%;
+                flex: 1 1 100%;
+            }
+            .clear-btn,
+            .export-btn,
+            .import-btn {
+                flex: 1 1 0;
+            }
+            .hist-header,
+            .hist-footer {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .hist-header-right {
+                justify-content: flex-start;
+            }
+            .hist-row {
+                grid-template-columns: 1fr;
+                gap: 2px;
+            }
+            .login-card {
+                padding: 24px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -440,7 +1174,17 @@
     <div class="calculator-app" id="calculatorApp">
         <div class="calc-body">
             <div class="app-container" id="main-container">
-                <h2 class="app-title">纳米纤维膜平均克重工艺计算</h2>
+                <div class="calc-intro">
+                    <div>
+                        <p class="calc-kicker">PROCESS WORKBENCH</p>
+                        <h2 class="app-title">纳米纤维膜平均克重工艺计算</h2>
+                        <p class="calc-desc">保持原计算原理不变，将材料体系、密度推导、核心参数、结果与实验记录统一到同一个工作台。</p>
+                    </div>
+                    <div class="formula-strip" aria-label="核心公式">
+                        <span>克重 = Q × ρ × a ÷ (v × 60)</span>
+                        <span>速度 = Q × ρ × a ÷ (目标 × 60)</span>
+                    </div>
+                </div>
                 <div class="layout-columns">
                     <div class="left-column">
                         <div class="tab-group">
