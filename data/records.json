@@ -1,5 +1,33 @@
 [
   {
+    "id": "mpxvfsnimy2nyhhf0ds",
+    "time": "2026-06-03 17:35",
+    "calcType": "预测克重",
+    "typeClass": "badge-type-predict",
+    "mode": "单一溶质",
+    "solute": "PVA (10%)",
+    "solvent": "H2O",
+    "flowL": "40",
+    "rho": "1.020",
+    "speed": "0.010",
+    "result": "6.80 g/m²",
+    "raw": {
+      "mode": "single",
+      "sSolute": "PVA",
+      "sConc": "10",
+      "sSolvent": "H2O",
+      "mCombo": "TPU_SA",
+      "mA1": "12",
+      "mA2": "5",
+      "mSolvent": "DMF",
+      "L": "40",
+      "rho": "1.020",
+      "speed": "0.010",
+      "target": "10"
+    },
+    "user": "admin"
+  },
+  {
     "id": "mpxribtlupah7p84tt",
     "time": "2026-06-03 15:45",
     "calcType": "预测克重",
