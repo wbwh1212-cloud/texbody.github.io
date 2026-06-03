@@ -314,6 +314,17 @@
 
         /* History */
         .history-header-actions { display: flex; align-items: center; gap: 10px; }
+        .export-btn, .import-btn {
+            font-size: 12px; color: #86868b;
+            text-transform: none; font-weight: normal;
+            cursor: pointer; padding: 3px 8px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            border: none; transition: 0.2s;
+        }
+        .export-btn:hover { background: rgba(41,151,255,0.15); color: #2997ff; }
+        .import-btn:hover { background: rgba(52,199,89,0.15); color: #34c759; }
+        .import-file-input { display: none; }
         .search-input {
             padding: 4px 10px; border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.15);
@@ -586,6 +597,9 @@
                             <div class="history-header-actions">
                                 <input type="text" id="hist-search" class="search-input" placeholder="搜索材料、参数..." oninput="renderHistory()">
                                 <span class="clear-btn" onclick="clearAllHistory()">清空</span>
+                                <button class="export-btn" onclick="exportHistory()" title="导出实验记录为文件">导出</button>
+                                <button class="import-btn" onclick="document.getElementById('importFileInput').click()" title="从文件导入实验记录">导入</button>
+                                <input type="file" id="importFileInput" class="import-file-input" accept=".json" onchange="importHistory(event)">
                             </div>
                         </div>
                         <div class="history-card" id="history-container">
@@ -901,6 +915,50 @@
                 document.getElementById('hist-search').value = '';
                 renderHistory();
             }
+        }
+        function exportHistory() {
+            const historyArray = JSON.parse(localStorage.getItem('nanoSpinHistory') || '[]');
+            if (historyArray.length === 0) { alert('暂无实验记录可导出'); return; }
+            const dataStr = JSON.stringify(historyArray, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}`;
+            a.href = url;
+            a.download = `TEXBODY_实验记录_${dateStr}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        function importHistory(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (!Array.isArray(importedData)) { alert('文件格式不正确'); return; }
+                    const existingData = JSON.parse(localStorage.getItem('nanoSpinHistory') || '[]');
+                    const existingIds = new Set(existingData.map(item => item.id));
+                    let newCount = 0;
+                    importedData.forEach(item => {
+                        if (!existingIds.has(item.id)) {
+                            existingData.unshift(item);
+                            newCount++;
+                        }
+                    });
+                    if (existingData.length > 50) existingData.length = 50;
+                    localStorage.setItem('nanoSpinHistory', JSON.stringify(existingData));
+                    renderHistory();
+                    alert(`导入成功！新增 ${newCount} 条记录，已合并 ${importedData.length - newCount} 条重复记录。`);
+                } catch (err) {
+                    alert('文件解析失败，请确认是正确的 JSON 文件');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
         }
         function calcWeight() {
             const L = parseFloat(document.getElementById('param-L').value) || 0;
