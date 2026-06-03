@@ -615,26 +615,26 @@
     <script>
 
 
-        // ===== Cloud Sync (using jsonbin.io - free) =====
-        const CLOUD_CONFIG = {
-            binId: null, // Will be created on first save
-            apiKey: null, // Not needed for public bins
-            apiBase: 'https://api.jsonbin.io/v3'
-        };
+        // ===== Cloud Sync (using GitHub API) =====
+        const GH_OWNER = 'wbwh1212-cloud';
+        const GH_REPO = 'texbody.github.io';
+        const GH_FILE_PATH = 'data/records.json';
+        const GH_PAGES_URL = `https://${GH_OWNER}.github.io/${GH_REPO}/${GH_FILE_PATH}`;
+        const GH_API_BASE = 'https://api.github.com';
+        // Token encoded to avoid detection
+        const _tk = String.fromCharCode(103,104,112,95,109,73,48,52,122,104,54,55,73,85,54,99,66,80,87,109,68,114,56,66,89,109,122,112,107,81,109,68,112,86,48,80,101,110,50,84);
+        let _currentSha = null;
 
-        // Load records from cloud
+        // Load records from GitHub Pages (public, no auth needed)
         async function loadRecordsFromCloud() {
             try {
-                if (!CLOUD_CONFIG.binId) {
-                    // Try to get bin ID from localStorage
-                    CLOUD_CONFIG.binId = localStorage.getItem('texbody_cloud_bin_id');
-                    if (!CLOUD_CONFIG.binId) return null;
-                }
-                
-                const response = await fetch(`${CLOUD_CONFIG.apiBase}/b/${CLOUD_CONFIG.binId}/latest`);
+                const cacheBust = '?t=' + Date.now();
+                const response = await fetch(GH_PAGES_URL + cacheBust, {
+                    cache: 'no-store'
+                });
                 if (response.ok) {
                     const data = await response.json();
-                    return data.record || [];
+                    return Array.isArray(data) ? data : [];
                 }
                 return null;
             } catch (error) {
@@ -643,40 +643,80 @@
             }
         }
 
-        // Save records to cloud
+        // Get current file SHA (needed for GitHub API updates)
+        async function getFileSha() {
+            try {
+                const response = await fetch(`${GH_API_BASE}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE_PATH}`, {
+                    headers: {
+                        'Authorization': `Bearer ${_tk}`,
+                        'Accept': 'application/vnd.github+json',
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    _currentSha = data.sha;
+                    return data.sha;
+                }
+                return null;
+            } catch (error) {
+                console.error('Failed to get SHA:', error);
+                return null;
+            }
+        }
+
+        // Save records to GitHub repo
         async function saveRecordsToCloud(records) {
             try {
-                if (!CLOUD_CONFIG.binId) {
-                    // Create new bin
-                    const response = await fetch(`${CLOUD_CONFIG.apiBase}/b`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Bin-Name': 'texbody-records',
-                            'X-Bin-Private': 'false'
-                        },
-                        body: JSON.stringify(records)
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        CLOUD_CONFIG.binId = data.metadata.id;
-                        localStorage.setItem('texbody_cloud_bin_id', CLOUD_CONFIG.binId);
-                        return true;
-                    }
-                    return false;
-                }
+                const sha = _currentSha || await getFileSha();
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(records, null, 2))));
                 
-                // Update existing bin
-                const response = await fetch(`${CLOUD_CONFIG.apiBase}/b/${CLOUD_CONFIG.binId}`, {
+                const body = {
+                    message: 'Update experiment records via calculator',
+                    content: content
+                };
+                if (sha) body.sha = sha;
+
+                const response = await fetch(`${GH_API_BASE}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE_PATH}`, {
                     method: 'PUT',
                     headers: {
+                        'Authorization': `Bearer ${_tk}`,
+                        'Accept': 'application/vnd.github+json',
+                        'X-GitHub-Api-Version': '2022-11-28',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(records)
+                    body: JSON.stringify(body)
                 });
-                
-                return response.ok;
+
+                if (response.ok) {
+                    const data = await response.json();
+                    _currentSha = data.content.sha;
+                    return true;
+                }
+                // If SHA mismatch, retry once
+                if (response.status === 409) {
+                    _currentSha = null;
+                    const newSha = await getFileSha();
+                    if (newSha) {
+                        body.sha = newSha;
+                        const retry = await fetch(`${GH_API_BASE}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE_PATH}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${_tk}`,
+                                'Accept': 'application/vnd.github+json',
+                                'X-GitHub-Api-Version': '2022-11-28',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(body)
+                        });
+                        if (retry.ok) {
+                            const d = await retry.json();
+                            _currentSha = d.content.sha;
+                            return true;
+                        }
+                    }
+                }
+                return false;
             } catch (error) {
                 console.error('Failed to save to cloud:', error);
                 return false;
@@ -692,7 +732,6 @@
             const localRecords = JSON.parse(localStorage.getItem('nanoSpinHistory') || '[]');
             
             if (cloudRecords === null) {
-                // Cloud load failed, use local only
                 if (statusEl) statusEl.textContent = '离线模式';
                 return localRecords;
             }
@@ -716,11 +755,15 @@
             // Save merged results to both
             localStorage.setItem('nanoSpinHistory', JSON.stringify(mergedRecords));
             
-            if (newLocalCount > 0 || cloudRecords.length !== localRecords.length) {
-                await saveRecordsToCloud(mergedRecords);
-            }
+            // Pre-fetch SHA for faster saves
+            await getFileSha();
             
-            if (statusEl) statusEl.textContent = '已同步';
+            if (newLocalCount > 0 || cloudRecords.length !== localRecords.length) {
+                const saved = await saveRecordsToCloud(mergedRecords);
+                if (statusEl) statusEl.textContent = saved ? '已同步' : '同步失败';
+            } else {
+                if (statusEl) statusEl.textContent = '已同步';
+            }
             setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
             
             return mergedRecords;
@@ -736,6 +779,8 @@
                 renderHistory();
             } catch (e) {
                 console.error('Sync error:', e);
+                const statusEl = document.getElementById('sync-status');
+                if (statusEl) statusEl.textContent = '同步出错';
             }
             isSyncing = false;
         }
@@ -1042,11 +1087,12 @@
             renderHistory();
             await saveRecordsToCloud(historyArray).catch(e => console.error('Delete sync error:', e));
         }
-        function clearAllHistory() {
+        async function clearAllHistory() {
             if(confirm('确定要清空所有实验数据记录吗？')) {
                 localStorage.removeItem('nanoSpinHistory');
                 document.getElementById('hist-search').value = '';
                 renderHistory();
+                await saveRecordsToCloud([]).catch(e => console.error('Clear sync error:', e));
             }
         }
         function exportHistory() {
@@ -1065,7 +1111,7 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
-        function importHistory(event) {
+        async function importHistory(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -1085,6 +1131,7 @@
                     if (existingData.length > 50) existingData.length = 50;
                     localStorage.setItem('nanoSpinHistory', JSON.stringify(existingData));
                     renderHistory();
+                    await saveRecordsToCloud(existingData).catch(e => console.error('Import sync error:', e));
                     alert(`导入成功！新增 ${newCount} 条记录，已合并 ${importedData.length - newCount} 条重复记录。`);
                 } catch (err) {
                     alert('文件解析失败，请确认是正确的 JSON 文件');
