@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEXBODY - 江苏太帛先进纤维科技有限公司</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a365d;
+            --secondary: #2c5282;
+            --accent: #3182ce;
+            --light: #ebf8ff;
+            --dark: #1a202c;
+            --text: #2d3748;
+            --text-light: #718096;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #3182ce 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(26, 54, 93, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 0 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--white);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #63b3ed, #4299e1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #63b3ed;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #63b3ed;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            z-index: 1;
+            padding: 2rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 24px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: 4px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .hero h2 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .hero-desc {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            opacity: 0.85;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 36px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--white);
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--white);
+        }
+
+        /* Sections */
+        section {
+            padding: 6rem 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.05rem;
+        }
+
+        .section-divider {
+            width: 60px;
+            height: 4px;
+            background: var(--gradient);
+            margin: 1rem auto;
+            border-radius: 2px;
+        }
+
+        /* About Section */
+        .about {
+            background: var(--white);
+        }
+
+        .about-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-image {
+            background: var(--gradient);
+            border-radius: 16px;
+            padding: 3rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-image::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+
+        .about-image h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .about-image p {
+            opacity: 0.9;
+            line-height: 1.8;
+            position: relative;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+            position: relative;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .about-text h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .about-text p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .about-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .about-list li {
+            padding: 8px 0;
+            padding-left: 28px;
+            position: relative;
+            color: var(--text);
+        }
+
+        .about-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Products Section */
+        .products {
+            background: #f7fafc;
+        }
+
+        .products-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2.5rem;
+            transition: all 0.3s;
+            border: 1px solid #e2e8f0;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+        }
+
+        .product-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .product-card h3 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .product-card p {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* Technology Section */
+        .technology {
+            background: var(--white);
+        }
+
+        .tech-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .tech-item {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .tech-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(26, 54, 93, 0.3);
+        }
+
+        .tech-item h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-item p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Advantages Section */
+        .advantages {
+            background: #f7fafc;
+        }
+
+        .advantages-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .advantage-row {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        .advantage-row:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .advantage-content {
+            flex: 1;
+        }
+
+        .advantage-visual {
+            flex: 1;
+            background: var(--gradient);
+            border-radius: 16px;
+            padding: 3rem;
+            color: white;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        .advantage-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent);
+            opacity: 0.3;
+            margin-bottom: 0.5rem;
+        }
+
+        .advantage-content h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .advantage-content p {
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+
+        /* Contact Section */
+        .contact {
+            background: var(--gradient);
+            color: var(--white);
+        }
+
+        .contact .section-header h2 {
+            color: var(--white);
+        }
+
+        .contact .section-header p {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .contact .section-divider {
+            background: var(--white);
+        }
+
+        .contact-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .contact-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+
+        .contact-card:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-5px);
+        }
+
+        .contact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: rgba(255,255,255,0.7);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .footer-text {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero h2 {
+                font-size: 1.3rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .about-grid,
+            .advantage-row,
+            .advantage-row:nth-child(even) {
+                grid-template-columns: 1fr;
+                flex-direction: column;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tech-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            opacity: 0.7;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-15px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-7px);
+            }
+        }
+
+        .scroll-indicator span {
+            display: block;
+            width: 24px;
+            height: 24px;
+            border-bottom: 2px solid white;
+            border-right: 2px solid white;
+            transform: rotate(45deg);
+            margin: -10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">T</div>
+                <div>
+                    <div class="logo-text">TEXBODY</div>
+                    <div class="logo-sub">太帛先进纤维科技</div>
+                </div>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#about">关于我们</a></li>
+                <li><a href="#products">产品服务</a></li>
+                <li><a href="#technology">核心技术</a></li>
+                <li><a href="#advantages">公司优势</a></li>
+                <li><a href="#contact">联系我们</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-badge">先进纤维科技领导者</div>
+            <h1>TEXBODY</h1>
+            <h2>江苏太帛先进纤维科技有限公司</h2>
+            <p class="hero-desc">
+                专注于高性能纤维材料的研发、生产与应用，致力于为客户提供创新的纤维解决方案，推动行业技术进步。
+            </p>
+            <div class="hero-buttons">
+                <a href="#about" class="btn btn-primary">了解更多</a>
+                <a href="#contact" class="btn btn-outline">联系我们</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="section-header">
+            <h2>关于太帛</h2>
+            <div class="section-divider"></div>
+            <p>创新引领未来，纤维改变世界</p>
+        </div>
+        <div class="about-grid">
+            <div class="about-image animate">
+                <h3>公司简介</h3>
+                <p>
+                    江苏太帛先进纤维科技有限公司是一家专注于先进纤维材料研发与生产的高新技术企业。公司秉承"科技创新、品质至上"的经营理念，汇聚行业顶尖人才，拥有先进的生产设备和完善的质量管理体系。
+                </p>
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">10+</span>
+                        <span class="stat-label">年行业经验</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">专利技术</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">100+</span>
+                        <span class="stat-label">合作客户</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">产品型号</span>
+                    </div>
+                </div>
+            </div>
+            <div class="about-text animate delay-2">
+                <h3>我们的使命</h3>
+                <p>
+                    以先进纤维技术为核心，为全球客户提供高性能、高品质的纤维材料和解决方案，推动纺织、医疗、航空航天等领域的技术革新。
+                </p>
+                <h3>核心价值观</h3>
+                <ul class="about-list">
+                    <li>创新驱动 - 持续投入研发，引领行业技术发展</li>
+                    <li>品质卓越 - 严格把控质量，打造国际一流产品</li>
+                    <li>客户至上 - 深入理解需求，提供定制化解决方案</li>
+                    <li>绿色发展 - 践行环保理念，推动可持续发展</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="products">
+        <div class="section-header">
+            <h2>产品与服务</h2>
+            <div class="section-divider"></div>
+            <p>多元化产品线，满足不同领域需求</p>
+        </div>
+        <div class="products-grid">
+            <div class="product-card animate">
+                <div class="product-icon">🧪</div>
+                <h3>高性能纤维</h3>
+                <p>包括碳纤维、芳纶纤维、超高分子量聚乙烯纤维等，广泛应用于航空航天、汽车轻量化、体育器材等领域。</p>
+            </div>
+            <div class="product-card animate delay-1">
+                <div class="product-icon">🏥</div>
+                <h3>医疗纤维</h3>
+                <p>生物相容性纤维材料，用于手术缝合线、人工血管、组织工程支架等医疗领域，通过多项国际认证。</p>
+            </div>
+            <div class="product-card animate delay-2">
+                <div class="product-icon">🛡️</div>
+                <h3>防护材料</h3>
+                <p>高强度防护纤维，用于防弹衣、防刺服、消防服等特种防护装备，为生命安全提供可靠保障。</p>
+            </div>
+            <div class="product-card animate delay-3">
+                <div class="product-icon">🏗️</div>
+                <h3>工业纤维</h3>
+                <p>耐高温、耐腐蚀工业纤维，应用于过滤材料、增强复合材料、传送带等工业领域。</p>
+            </div>
+            <div class="product-card animate delay-4">
+                <div class="product-icon">🌿</div>
+                <h3>环保纤维</h3>
+                <p>可降解、可再生的环保纤维材料，助力绿色纺织产业发展，减少环境污染。</p>
+            </div>
+            <div class="product-card animate">
+                <div class="product-icon">🔬</div>
+                <h3>定制研发</h3>
+                <p>根据客户需求提供纤维材料定制研发服务，从配方设计到产品交付，全程技术支持。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Section -->
+    <section class="technology" id="technology">
+        <div class="section-header">
+            <h2>核心技术</h2>
+            <div class="section-divider"></div>
+            <p>持续创新，掌握关键核心技术</p>
+        </div>
+        <div class="tech-grid">
+            <div class="tech-item animate">
+                <div class="tech-icon">⚡</div>
+                <h3>纳米纤维技术</h3>
+                <p>纳米级纤维制备与应用技术</p>
+            </div>
+            <div class="tech-item animate delay-1">
+                <div class="tech-icon">🔄</div>
+                <h3>智能纺丝</h3>
+                <p>自动化、智能化纺丝生产线</p>
+            </div>
+            <div class="tech-item animate delay-2">
+                <div class="tech-icon">📊</div>
+                <h3>质量控制</h3>
+                <p>AI辅助的全流程质量监控</p>
+            </div>
+            <div class="tech-item animate delay-3">
+                <div class="tech-icon">🌱</div>
+                <h3>绿色制造</h3>
+                <p>环保工艺与循环利用技术</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages Section -->
+    <section class="advantages" id="advantages">
+        <div class="section-header">
+            <h2>为什么选择太帛</h2>
+            <div class="section-divider"></div>
+            <p>专业、可靠、值得信赖的合作伙伴</p>
+        </div>
+        <div class="advantages-container">
+            <div class="advantage-row">
+                <div class="advantage-content animate">
+                    <div class="advantage-number">01</div>
+                    <h3>技术领先</h3>
+                    <p>拥有50多项核心专利技术，研发团队由多位行业专家组成，持续投入研发经费，保持技术领先地位。与多所高校和科研院所建立产学研合作关系。</p>
+                </div>
+                <div class="advantage-visual animate delay-1">
+                    🔬
+                </div>
+            </div>
+            <div class="advantage-row">
+                <div class="advantage-content animate">
+                    <div class="advantage-number">02</div>
+                    <h3>品质保障</h3>
+                    <p>通过ISO9001、ISO14001、IATF16949等多项国际认证，建立完善的质量管理体系。从原材料采购到成品出厂，每一道工序都严格把控。</p>
+                </div>
+                <div class="advantage-visual animate delay-1">
+                    ✅
+                </div>
+            </div>
+            <div class="advantage-row">
+                <div class="advantage-content animate">
+                    <div class="advantage-number">03</div>
+                    <h3>定制服务</h3>
+                    <p>提供从产品设计、配方开发到批量生产的全流程定制服务。专业的技术团队深入了解客户需求，提供最优解决方案。</p>
+                </div>
+                <div class="advantage-visual animate delay-1">
+                    🎯
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="section-header">
+            <h2>联系我们</h2>
+            <div class="section-divider"></div>
+            <p>期待与您合作，共创美好未来</p>
+        </div>
+        <div class="contact-grid">
+            <div class="contact-card animate">
+                <div class="contact-icon">📍</div>
+                <h3>公司地址</h3>
+                <p>江苏省<br>太帛科技园</p>
+            </div>
+            <div class="contact-card animate delay-1">
+                <div class="contact-icon">📞</div>
+                <h3>联系电话</h3>
+                <p>400-XXX-XXXX<br>+86-XXX-XXXXXXXX</p>
+            </div>
+            <div class="contact-card animate delay-2">
+                <div class="contact-icon">✉️</div>
+                <h3>电子邮箱</h3>
+                <p>info@texbody.com<br>sales@texbody.com</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">TEXBODY</div>
+            <p class="footer-text">江苏太帛先进纤维科技有限公司</p>
+            <p class="footer-text">Jiangsu Texbody Advanced Fiber Technology Co., Ltd.</p>
+            <div class="footer-copyright">
+                <p>&copy; 2024 TEXBODY. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Navbar background on scroll
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(26, 54, 93, 0.98)';
+            } else {
+                nav.style.background = 'rgba(26, 54, 93, 0.95)';
+            }
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
