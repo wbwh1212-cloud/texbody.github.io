@@ -613,6 +613,133 @@
     </div>
 
     <script>
+
+
+        // ===== Cloud Sync (using jsonbin.io - free) =====
+        const CLOUD_CONFIG = {
+            binId: null, // Will be created on first save
+            apiKey: null, // Not needed for public bins
+            apiBase: 'https://api.jsonbin.io/v3'
+        };
+
+        // Load records from cloud
+        async function loadRecordsFromCloud() {
+            try {
+                if (!CLOUD_CONFIG.binId) {
+                    // Try to get bin ID from localStorage
+                    CLOUD_CONFIG.binId = localStorage.getItem('texbody_cloud_bin_id');
+                    if (!CLOUD_CONFIG.binId) return null;
+                }
+                
+                const response = await fetch(`${CLOUD_CONFIG.apiBase}/b/${CLOUD_CONFIG.binId}/latest`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.record || [];
+                }
+                return null;
+            } catch (error) {
+                console.error('Failed to load from cloud:', error);
+                return null;
+            }
+        }
+
+        // Save records to cloud
+        async function saveRecordsToCloud(records) {
+            try {
+                if (!CLOUD_CONFIG.binId) {
+                    // Create new bin
+                    const response = await fetch(`${CLOUD_CONFIG.apiBase}/b`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Bin-Name': 'texbody-records',
+                            'X-Bin-Private': 'false'
+                        },
+                        body: JSON.stringify(records)
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        CLOUD_CONFIG.binId = data.metadata.id;
+                        localStorage.setItem('texbody_cloud_bin_id', CLOUD_CONFIG.binId);
+                        return true;
+                    }
+                    return false;
+                }
+                
+                // Update existing bin
+                const response = await fetch(`${CLOUD_CONFIG.apiBase}/b/${CLOUD_CONFIG.binId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(records)
+                });
+                
+                return response.ok;
+            } catch (error) {
+                console.error('Failed to save to cloud:', error);
+                return false;
+            }
+        }
+
+        // Sync records: load from cloud, merge with local, save back
+        async function syncRecords() {
+            const statusEl = document.getElementById('sync-status');
+            if (statusEl) statusEl.textContent = '同步中...';
+            
+            const cloudRecords = await loadRecordsFromCloud();
+            const localRecords = JSON.parse(localStorage.getItem('nanoSpinHistory') || '[]');
+            
+            if (cloudRecords === null) {
+                // Cloud load failed, use local only
+                if (statusEl) statusEl.textContent = '离线模式';
+                return localRecords;
+            }
+            
+            // Merge: cloud records take priority, add any new local records
+            const cloudIds = new Set(cloudRecords.map(r => r.id));
+            const mergedRecords = [...cloudRecords];
+            
+            let newLocalCount = 0;
+            localRecords.forEach(local => {
+                if (!cloudIds.has(local.id)) {
+                    mergedRecords.push(local);
+                    newLocalCount++;
+                }
+            });
+            
+            // Sort by time (newest first) and limit to 50
+            mergedRecords.sort((a, b) => new Date(b.time) - new Date(a.time));
+            if (mergedRecords.length > 50) mergedRecords.length = 50;
+            
+            // Save merged results to both
+            localStorage.setItem('nanoSpinHistory', JSON.stringify(mergedRecords));
+            
+            if (newLocalCount > 0 || cloudRecords.length !== localRecords.length) {
+                await saveRecordsToCloud(mergedRecords);
+            }
+            
+            if (statusEl) statusEl.textContent = '已同步';
+            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+            
+            return mergedRecords;
+        }
+
+        // Initialize: sync on page load
+        let isSyncing = false;
+        async function initCloudSync() {
+            if (isSyncing) return;
+            isSyncing = true;
+            try {
+                await syncRecords();
+                renderHistory();
+            } catch (e) {
+                console.error('Sync error:', e);
+            }
+            isSyncing = false;
+        }
+
         // ===== Authentication =====
         function simpleHash(str) {
             let hash = 0;
@@ -644,6 +771,7 @@
                 sessionStorage.setItem('texbody_auth', 'true');
                 sessionStorage.setItem('texbody_user', username);
                 showCalculator();
+                initCloudSync();
             } else {
                 errorEl.textContent = '用户名或密码错误';
                 errorEl.style.display = 'block';
@@ -832,8 +960,8 @@
             localStorage.setItem('nanoSpinHistory', JSON.stringify(historyArray));
             document.getElementById('hist-search').value = '';
             renderHistory();
-            // Sync to GitHub in background
-            saveRecordsToGitHub(historyArray).catch(e => console.error('Save sync error:', e));
+            // Sync to cloud in background
+            saveRecordsToCloud(historyArray).catch(e => console.error('Save sync error:', e));
         }
         function renderHistory() {
             const historyArray = JSON.parse(localStorage.getItem('nanoSpinHistory') || '[]');
@@ -912,7 +1040,7 @@
             historyArray = historyArray.filter(item => item.id !== id);
             localStorage.setItem('nanoSpinHistory', JSON.stringify(historyArray));
             renderHistory();
-            await saveRecordsToGitHub(historyArray).catch(e => console.error('Delete sync error:', e));
+            await saveRecordsToCloud(historyArray).catch(e => console.error('Delete sync error:', e));
         }
         function clearAllHistory() {
             if(confirm('确定要清空所有实验数据记录吗？')) {
