@@ -26,5 +26,59 @@
       "target": "10"
     },
     "user": "texbody"
+  },
+  {
+    "id": "mpxnea8t4w4l0hmqr7i",
+    "time": "2026-06-03 13:50",
+    "calcType": "反推速度",
+    "typeClass": "badge-type-speed",
+    "mode": "单一溶质",
+    "solute": "PVA (10%)",
+    "solvent": "H2O",
+    "flowL": "40",
+    "rho": "1.115",
+    "speed": 10,
+    "result": "0.0074 m/min",
+    "raw": {
+      "mode": "single",
+      "sSolute": "PVA",
+      "sConc": "10",
+      "sSolvent": "H2O",
+      "mCombo": "TPU_SA",
+      "mA1": "12",
+      "mA2": "5",
+      "mSolvent": "DMF",
+      "L": "40",
+      "rho": "1.115",
+      "speed": "0.010",
+      "target": "10"
+    }
+  },
+  {
+    "id": "mpxne9883b8qt4btt0i",
+    "time": "2026-06-03 13:50",
+    "calcType": "预测克重",
+    "typeClass": "badge-type-predict",
+    "mode": "单一溶质",
+    "solute": "PVA (10%)",
+    "solvent": "H2O",
+    "flowL": "40",
+    "rho": "1.115",
+    "speed": "0.010",
+    "result": "7.43 g/m²",
+    "raw": {
+      "mode": "single",
+      "sSolute": "PVA",
+      "sConc": "10",
+      "sSolvent": "H2O",
+      "mCombo": "TPU_SA",
+      "mA1": "12",
+      "mA2": "5",
+      "mSolvent": "DMF",
+      "L": "40",
+      "rho": "1.115",
+      "speed": "0.010",
+      "target": "10"
+    }
   }
 ]
