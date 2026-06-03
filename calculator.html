@@ -815,7 +815,7 @@
                 raw: rawData
             };
         }
-        function saveHistory(calcType, calcTypeClass, context, speedVal, targetOrResult) {
+        async function saveHistory(calcType, calcTypeClass, context, speedVal, targetOrResult) {
             let historyArray = JSON.parse(localStorage.getItem('nanoSpinHistory') || '[]');
             const now = new Date();
             const timeStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -824,12 +824,15 @@
                 id: uniqueId, time: timeStr, calcType: calcType, typeClass: calcTypeClass,
                 mode: context.modeStr, solute: context.solute, solvent: context.solvent,
                 flowL: context.flowL, rho: context.rho, speed: speedVal,
-                result: targetOrResult, raw: context.raw
+                result: targetOrResult, raw: context.raw,
+                user: sessionStorage.getItem('texbody_user') || 'unknown'
             });
             if(historyArray.length > 50) historyArray.pop();
             localStorage.setItem('nanoSpinHistory', JSON.stringify(historyArray));
             document.getElementById('hist-search').value = '';
             renderHistory();
+            // Sync to GitHub in background
+            saveRecordsToGitHub(historyArray).catch(e => console.error('Save sync error:', e));
         }
         function renderHistory() {
             const historyArray = JSON.parse(localStorage.getItem('nanoSpinHistory') || '[]');
@@ -903,11 +906,12 @@
             container.style.borderColor = "#34c759";
             setTimeout(() => { container.style.borderColor = "rgba(255,255,255,0.08)"; }, 600);
         }
-        function deleteHistoryItem(id) {
+        async function deleteHistoryItem(id) {
             let historyArray = JSON.parse(localStorage.getItem('nanoSpinHistory') || '[]');
             historyArray = historyArray.filter(item => item.id !== id);
             localStorage.setItem('nanoSpinHistory', JSON.stringify(historyArray));
             renderHistory();
+            await saveRecordsToGitHub(historyArray).catch(e => console.error('Delete sync error:', e));
         }
         function clearAllHistory() {
             if(confirm('确定要清空所有实验数据记录吗？')) {
